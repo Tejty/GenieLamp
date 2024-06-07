@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "genie_lamp:item/magic_lamp"
+  }
+}

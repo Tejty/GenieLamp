@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "genie_lamp:block/charged_magic_lamp",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "genie_lamp:block/charged_magic_lamp"
+    },
+    "facing=south": {
+      "model": "genie_lamp:block/charged_magic_lamp",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "genie_lamp:block/charged_magic_lamp",
+      "y": 270
+    }
+  }
+}
