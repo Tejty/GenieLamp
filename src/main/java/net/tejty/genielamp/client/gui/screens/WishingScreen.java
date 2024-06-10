@@ -17,7 +17,9 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
@@ -61,7 +63,7 @@ public class WishingScreen extends Screen {
     private static final int SEARCH_BOX_HEIGHT = 10;
 
     public static Player player;
-    private static Collection<Item> items;
+    private static Collection<ItemStack> items;
     private static Collection<Item> unsortedItems;
     private static Collection<ItemStack> unsortedItemsFromTab;
     private int scrollOff;
@@ -104,18 +106,18 @@ public class WishingScreen extends Screen {
     }
 
     protected void init() {
+        CreativeModeTabs.tryRebuildTabContents(FeatureFlags.DEFAULT_FLAGS, true, player.level().registryAccess());
         this.createScreen();
     }
 
     private void createScreen() {
         unsortedItems = ForgeRegistries.ITEMS.getValues();
-        /*
-        CreativeModeTab tab = CreativeModeTabRegistry.getTab(new ResourceLocation("combat"));
+        CreativeModeTab tab = CreativeModeTabRegistry.getTab(new ResourceLocation("search"));
         unsortedItemsFromTab = tab.getDisplayItems();
         player.displayClientMessage(Component.literal("name: " + tab.getDisplayName()), false);
         player.displayClientMessage(Component.literal("size: " + unsortedItemsFromTab.size()), false);
-        player.displayClientMessage(Component.literal("item: " + tab.getIconItem()), false);*/
-        items = unsortedItems;
+        player.displayClientMessage(Component.literal("item: " + tab), false);
+        items = unsortedItemsFromTab;
         this.searchBox = new EditBox(this.font, getBackgroundCornerX() + SEARCH_BOX_PADDING_LEFT, getBackgroundCornerY() + SEARCH_BOX_PADDING_TOP, SEARCH_BOX_WIDTH, SEARCH_BOX_HEIGHT, Component.translatable("itemGroup.search"));
         this.searchBox.setMaxLength(50);
         this.searchBox.setBordered(false);
@@ -168,7 +170,7 @@ public class WishingScreen extends Screen {
             try {
                 int x = (itemValue % COLUMNS) * SLOT_SIZE + getContentCornerX();
                 int y = (itemValue - itemValue % COLUMNS) / COLUMNS * SLOT_SIZE + getContentCornerY();
-                ItemStack stack = new ItemStack((Item) items.toArray()[itemValue + scrollOff * COLUMNS], 1);
+                ItemStack stack = (ItemStack)items.toArray()[itemValue + scrollOff * COLUMNS];
                 graphics.renderItem(
                         stack,
                         x + getSlotPadding(),
@@ -249,7 +251,7 @@ public class WishingScreen extends Screen {
         return super.mouseClicked(pMouseX, pMouseY, pButton);
     }
     private void refreshSearchResults() {
-        items = unsortedItems.stream().filter((Item item) -> StringUtils.toLowerCase(stripControlCodes(item.getName(new ItemStack(item, 1)).getString())).contains(StringUtils.toLowerCase(searchBox.getValue()))).collect(Collectors.toList());
+        items = unsortedItemsFromTab.stream().filter((ItemStack item) -> StringUtils.toLowerCase(stripControlCodes(item.getItem().getName(item).getString())).contains(StringUtils.toLowerCase(searchBox.getValue()))).collect(Collectors.toList());
         this.scrollOff = 0;
         /*
         items.clear();
