@@ -3,6 +3,11 @@ package net.tejty.genielamp.block.custom;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.util.ParticleUtils;
+import net.minecraft.util.RandomSource;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -29,6 +34,7 @@ public class ChargedMagicLampBlock extends HorizontalDirectionalBlock {
     public static final VoxelShape SHAPE_EAST;
     public static final VoxelShape SHAPE_SOUTH;
     public static final VoxelShape SHAPE_WEST;
+    private static final RandomSource random = RandomSource.create();
     public ChargedMagicLampBlock(Properties pProperties) {
         super(pProperties);
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
@@ -107,5 +113,43 @@ public class ChargedMagicLampBlock extends HorizontalDirectionalBlock {
         }
 
         return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public void animateTick(BlockState pState, Level pLevel, BlockPos pPos, RandomSource pRandom) {
+        for (int i = 0; i < 5; i++) {
+            pLevel.addParticle(
+                    ParticleTypes.DOLPHIN,
+                    pPos.getCenter().x + pState.getValue(FACING).step().x * 0.45,
+                    pPos.getCenter().y - 0.1,
+                    pPos.getCenter().z + pState.getValue(FACING).step().z * 0.45,
+                    0,
+                    0.3,
+                    0
+            );
+        }
+        if (random.nextInt(0, 5) == 0) {
+            pLevel.addParticle(
+                    ParticleTypes.GLOW,
+                    pPos.getX() + 0.2 + random.nextDouble() * 0.6,
+                    pPos.getY() + 0.0 + random.nextDouble() * 0.6,
+                    pPos.getZ() + 0.2 + random.nextDouble() * 0.6,
+                    0,
+                    0.2,
+                    0
+            );
+        }
+        if (random.nextInt(0, 5) == 0) {
+            pLevel.addParticle(
+                    ParticleTypes.GLOW,
+                    pPos.getX() + 0.2 + random.nextDouble() * 0.6,
+                    pPos.getY() + 0.0 + random.nextDouble() * 0.6,
+                    pPos.getZ() + 0.2 + random.nextDouble() * 0.6,
+                    0,
+                    0.2,
+                    0
+            );
+        }
+        //ParticleUtils.spawnParticlesAlongAxis(((Direction)pState.getValue(FACING)).getAxis(), pLevel, pPos, 0.125, ParticleTypes.ELECTRIC_SPARK, UniformInt.of(1, 2));
     }
 }
