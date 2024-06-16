@@ -1,5 +1,9 @@
 {
   "item.genie_lamp.magic_lamp": "Magic Lamp",
   "block.genie_lamp.charged_magic_lamp": "Charged Magic Lamp",
-  "wishing_screen.title": "I wish:"
+  "wishing_screen.title": "I wish:",
+  "item.genie_lamp.magic_lamp.tooltip.press": "Press ",
+  "item.genie_lamp.magic_lamp.tooltip.uncharged": "Uncharged",
+  "item.genie_lamp.magic_lamp.tooltip.experience": "Experience:",
+  "item.genie_lamp.magic_lamp.tooltip.for_details": " for details"
 }

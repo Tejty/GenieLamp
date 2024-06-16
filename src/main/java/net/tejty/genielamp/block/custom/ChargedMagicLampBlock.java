@@ -3,8 +3,12 @@ package net.tejty.genielamp.block.custom;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.ParticleUtils;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -140,15 +144,7 @@ public class ChargedMagicLampBlock extends HorizontalDirectionalBlock {
             );
         }
         if (random.nextInt(0, 5) == 0) {
-            pLevel.addParticle(
-                    ParticleTypes.GLOW,
-                    pPos.getX() + 0.2 + random.nextDouble() * 0.6,
-                    pPos.getY() + 0.0 + random.nextDouble() * 0.6,
-                    pPos.getZ() + 0.2 + random.nextDouble() * 0.6,
-                    0,
-                    0.2,
-                    0
-            );
+            pLevel.playLocalSound(pPos, SoundEvents.ALLAY_AMBIENT_WITHOUT_ITEM, SoundSource.BLOCKS, 0.5F, 0.5F, true);
         }
         //ParticleUtils.spawnParticlesAlongAxis(((Direction)pState.getValue(FACING)).getAxis(), pLevel, pPos, 0.125, ParticleTypes.ELECTRIC_SPARK, UniformInt.of(1, 2));
     }

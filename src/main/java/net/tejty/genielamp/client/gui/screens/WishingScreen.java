@@ -114,9 +114,9 @@ public class WishingScreen extends Screen {
         unsortedItems = ForgeRegistries.ITEMS.getValues();
         CreativeModeTab tab = CreativeModeTabRegistry.getTab(new ResourceLocation("search"));
         unsortedItemsFromTab = tab.getDisplayItems();
-        player.displayClientMessage(Component.literal("name: " + tab.getDisplayName()), false);
+        /*player.displayClientMessage(Component.literal("name: " + tab.getDisplayName()), false);
         player.displayClientMessage(Component.literal("size: " + unsortedItemsFromTab.size()), false);
-        player.displayClientMessage(Component.literal("item: " + tab), false);
+        player.displayClientMessage(Component.literal("item: " + tab), false);*/
         items = unsortedItemsFromTab;
         this.searchBox = new EditBox(this.font, getBackgroundCornerX() + SEARCH_BOX_PADDING_LEFT, getBackgroundCornerY() + SEARCH_BOX_PADDING_TOP, SEARCH_BOX_WIDTH, SEARCH_BOX_HEIGHT, Component.translatable("itemGroup.search"));
         this.searchBox.setMaxLength(50);
@@ -163,6 +163,7 @@ public class WishingScreen extends Screen {
     }
 
     public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        // TODO add darker background
         super.render(graphics, mouseX, mouseY, partialTicks);
         graphics.blit(BACKGROUND_LOCATION, getBackgroundCornerX(), getBackgroundCornerY(), 0, 0, 0, getBackgroundWidth(), getBackgroundHeight(), FILE_WIDTH, FILE_HEIGHT);
         int itemValue = 0;
