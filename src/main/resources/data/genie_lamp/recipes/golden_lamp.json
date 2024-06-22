@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "###",
+    "#@#",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:gold_block"
+    },
+    "@": {
+      "item": "genie_lamp:old_lamp"
+    }
+  },
+  "result": {
+    "item": "genie_lamp:golden_lamp",
+    "count": 1
+  }
+}

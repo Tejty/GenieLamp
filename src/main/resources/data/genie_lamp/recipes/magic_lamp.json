@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "###",
+    "#@#",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:lapis_block"
+    },
+    "@": {
+      "item": "genie_lamp:golden_lamp"
+    }
+  },
+  "result": {
+    "item": "genie_lamp:magic_lamp",
+    "count": 1
+  }
+}

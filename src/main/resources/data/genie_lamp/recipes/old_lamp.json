@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "genie_lamp:old_lamp_scrap"
+    }
+  },
+  "result": {
+    "item": "genie_lamp:old_lamp",
+    "count": 1
+  }
+}

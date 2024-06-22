@@ -59,6 +59,9 @@ public class GenieLamp {
     // Add the example block item to the building blocks tab
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES){
+            event.accept(ModItems.OLD_LAMP_SCRAP);
+            event.accept(ModItems.OLD_LAMP);
+            event.accept(ModItems.GOLDEN_LAMP);
             event.accept(ModItems.MAGIC_LAMP);
             event.accept(ModItems.CHARGED_MAGIC_LAMP);
         }

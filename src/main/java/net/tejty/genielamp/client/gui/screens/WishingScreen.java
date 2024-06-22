@@ -2,6 +2,7 @@ package net.tejty.genielamp.client.gui.screens;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -10,6 +11,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.searchtree.SearchTree;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -22,12 +24,16 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.CreativeModeTabSearchRegistry;
 import net.minecraftforge.common.CreativeModeTabRegistry;
 import net.minecraftforge.fml.loading.StringUtils;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.tejty.genielamp.GenieLamp;
+import net.tejty.genielamp.block.ModBlocks;
+import net.tejty.genielamp.item.ModItems;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -62,7 +68,9 @@ public class WishingScreen extends Screen {
     private static final int SEARCH_BOX_WIDTH = 88;
     private static final int SEARCH_BOX_HEIGHT = 10;
 
+    private final Level level;
     public static Player player;
+    private final BlockPos lampPos;
     private static Collection<ItemStack> items;
     private static Collection<Item> unsortedItems;
     private static Collection<ItemStack> unsortedItemsFromTab;
@@ -95,9 +103,11 @@ public class WishingScreen extends Screen {
     private int getSlotPadding(){return (SLOT_SIZE - ITEM_SIZE) / 2;}
     private int getSliderRange(){return SLIDER_BAR_HEIGHT - SLIDER_HEIGHT;}
 
-    public WishingScreen(Player pPlayer) {
+    public WishingScreen(Level pLevel, Player pPlayer, BlockPos pLampPos) {
         super(Component.literal("Item Wishing"));
+        level = pLevel;
         player = pPlayer;
+        lampPos = pLampPos;
     }
 
     @Override
@@ -132,6 +142,9 @@ public class WishingScreen extends Screen {
     public void tick() {
         super.tick();
         searchBox.tick();
+        if (!level.getBlockState(lampPos).is(ModBlocks.CHARGED_MAGIC_LAMP.get())){
+            this.minecraft.setScreen((Screen)null);
+        }
     }
 
     @Override
@@ -247,6 +260,32 @@ public class WishingScreen extends Screen {
         int rows = (int)Math.ceil((double) items.size() / COLUMNS);
         if (this.canScroll(rows) && pMouseX > left && pMouseX < right && pMouseY > top && pMouseY <= bottom) {
             this.isDragging = true;
+        }
+
+        if (
+                pMouseX > getContentCornerX()
+                        && pMouseX < getContentCornerX() + getContentWidth()
+                        && pMouseY > getContentCornerY()
+                        && pMouseY < getContentCornerY() + getContentHeight()
+        ) {
+            int x = (int)pMouseX - getContentCornerX();
+            int y = (int)pMouseY - getContentCornerY();
+            //player.displayClientMessage(Component.literal("x, y: " + x + ", " + y), false);
+
+            int slotX = (int)((float)x / (float)SLOT_SIZE);
+            int slotY = (int)((float)y / (float)SLOT_SIZE);
+            //player.displayClientMessage(Component.literal("slot x, slot y: " + slotX + ", " + slotY), false);
+
+            ItemStack stack = new ItemStack(((ItemStack)items.toArray()[(slotY * COLUMNS + slotX) + scrollOff * COLUMNS]).getItem(), 1);
+            //player.displayClientMessage(Component.literal("stack: " + stack.getItem().getName(stack)), false);
+            //player.addItem(stack);
+
+            if (level.getBlockState(lampPos).is(ModBlocks.CHARGED_MAGIC_LAMP.get())){
+                // TODO send packet about the item and position for destroying the lamp
+                return true;
+            }
+            Minecraft.getInstance().setScreen((Screen)null);
+            return false;
         }
 
         return super.mouseClicked(pMouseX, pMouseY, pButton);

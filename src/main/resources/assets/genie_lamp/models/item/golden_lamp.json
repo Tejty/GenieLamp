@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:item/handheld",
+  "loader": "forge:separate_transforms",
+  "base": {
+    "parent": "genie_lamp:item/golden_lamp_3d"
+  },
+  "perspectives": {
+    "gui": {
+      "parent": "genie_lamp:item/golden_lamp_2d"
+    }
+  }
+}

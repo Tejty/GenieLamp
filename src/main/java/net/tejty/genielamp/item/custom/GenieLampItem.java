@@ -58,6 +58,10 @@ public class GenieLampItem extends Item {
                 );
                 // Rendering experience ratio
                 pTooltip.add(Component.literal(getExperience(pStack) + "/" + getMaxExperience()));
+                // New line
+                pTooltip.add(Component.empty());
+                // Rendering tutorial
+                pTooltip.add(Component.translatable("item.genie_lamp.magic_lamp.tooltip.tutorial").withStyle(ChatFormatting.GRAY));
             }
         }
         else {
@@ -141,6 +145,11 @@ public class GenieLampItem extends Item {
 
         // If didn't worked, it returns failed
         return InteractionResultHolder.fail(item);
+    }
+
+    @Override
+    public int getUseDuration(ItemStack pStack) {
+        return 100;
     }
 
     @Override

@@ -113,7 +113,7 @@ public class ChargedMagicLampBlock extends HorizontalDirectionalBlock {
     @Override
     public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
         if (pLevel.isClientSide) {
-            Minecraft.getInstance().setScreen(new WishingScreen(pPlayer));
+            Minecraft.getInstance().setScreen(new WishingScreen(pLevel, pPlayer, pPos));
         }
 
         return InteractionResult.SUCCESS;
