@@ -20,9 +20,10 @@ public class ChargedGenieLampItem extends BlockItem {
         return true;
     }
 
-    /*@Override
-    public @NotNull UseAnim getUseAnimation(@NotNull ItemStack pStack) {
-        return UseAnim.BRUSH;
-        //return super.getUseAnimation(pStack);
-    }*/
+    @Override
+    public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltip, TooltipFlag pFlag) {
+        pTooltip.add(Component.translatable("item.genie_lamp.charged_magic_lamp").withStyle(ChatFormatting.GOLD));
+
+        super.appendHoverText(pStack, pLevel, pTooltip, pFlag);
+    }
 }
