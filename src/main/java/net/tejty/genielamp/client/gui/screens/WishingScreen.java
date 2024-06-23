@@ -1,6 +1,5 @@
 package net.tejty.genielamp.client.gui.screens;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -8,14 +7,9 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.client.searchtree.SearchTree;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
@@ -27,20 +21,19 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.CreativeModeTabSearchRegistry;
 import net.minecraftforge.common.CreativeModeTabRegistry;
 import net.minecraftforge.fml.loading.StringUtils;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.tejty.genielamp.GenieLamp;
 import net.tejty.genielamp.block.ModBlocks;
+import net.tejty.genielamp.config.GenieLampCommonConfigs;
 import net.tejty.genielamp.item.ModItems;
+import net.tejty.genielamp.networking.ModMessages;
+import net.tejty.genielamp.networking.packet.ItemWishingC2SPacket;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static net.minecraftforge.common.ForgeI18n.stripControlCodes;
 
@@ -121,9 +114,11 @@ public class WishingScreen extends Screen {
     }
 
     private void createScreen() {
-        unsortedItems = ForgeRegistries.ITEMS.getValues();
+        //unsortedItems = ForgeRegistries.ITEMS.getValues();
         CreativeModeTab tab = CreativeModeTabRegistry.getTab(new ResourceLocation("search"));
-        unsortedItemsFromTab = tab.getDisplayItems();
+        List<Item> bannedItems = GenieLampCommonConfigs.BANNED_ITEMS.get().stream()
+                .map(itemName -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName))).toList();
+        unsortedItemsFromTab = tab.getDisplayItems().stream().filter((ItemStack stack) -> !bannedItems.contains(stack.getItem())).collect(Collectors.toList());
         /*player.displayClientMessage(Component.literal("name: " + tab.getDisplayName()), false);
         player.displayClientMessage(Component.literal("size: " + unsortedItemsFromTab.size()), false);
         player.displayClientMessage(Component.literal("item: " + tab), false);*/
@@ -275,14 +270,19 @@ public class WishingScreen extends Screen {
             int slotX = (int)((float)x / (float)SLOT_SIZE);
             int slotY = (int)((float)y / (float)SLOT_SIZE);
             //player.displayClientMessage(Component.literal("slot x, slot y: " + slotX + ", " + slotY), false);
+            try {
+                ItemStack stack = ((ItemStack) items.toArray()[(slotY * COLUMNS + slotX) + scrollOff * COLUMNS]).copy();
+                //player.displayClientMessage(Component.literal("stack: " + stack.getItem().getName(stack)), false);
+                //player.addItem(stack);
 
-            ItemStack stack = new ItemStack(((ItemStack)items.toArray()[(slotY * COLUMNS + slotX) + scrollOff * COLUMNS]).getItem(), 1);
-            //player.displayClientMessage(Component.literal("stack: " + stack.getItem().getName(stack)), false);
-            //player.addItem(stack);
-
-            if (level.getBlockState(lampPos).is(ModBlocks.CHARGED_MAGIC_LAMP.get())){
-                // TODO send packet about the item and position for destroying the lamp
-                return true;
+                if (level.getBlockState(lampPos).is(ModBlocks.CHARGED_MAGIC_LAMP.get())) {
+                    ModMessages.sendToServer(new ItemWishingC2SPacket(stack, lampPos));
+                    Minecraft.getInstance().gameRenderer.displayItemActivation(stack);
+                    return true;
+                }
+            }
+            catch (IndexOutOfBoundsException ignored){
+                return false;
             }
             Minecraft.getInstance().setScreen((Screen)null);
             return false;

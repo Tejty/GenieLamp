@@ -28,7 +28,9 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.tejty.genielamp.block.ModBlocks;
+import net.tejty.genielamp.config.GenieLampCommonConfigs;
 import net.tejty.genielamp.item.ModItems;
+import net.tejty.genielamp.networking.ModMessages;
 import org.slf4j.Logger;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -48,12 +50,14 @@ public class GenieLamp {
 
         modEventBus.addListener(this::commonSetup);
 
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, GenieLampCommonConfigs.SPEC, "genie_lamp-common.toml");
+
         MinecraftForge.EVENT_BUS.register(this);
         modEventBus.addListener(this::addCreative);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
-
+        ModMessages.register();
     }
 
     // Add the example block item to the building blocks tab

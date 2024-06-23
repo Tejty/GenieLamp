@@ -18,6 +18,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.tejty.genielamp.config.GenieLampCommonConfigs;
 import net.tejty.genielamp.item.ModItems;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -191,6 +192,6 @@ public class GenieLampItem extends Item {
         }
     }
     public static int getMaxExperience(){
-        return 100;
+        return GenieLampCommonConfigs.XP_AMOUNT.get();
     }
 }
