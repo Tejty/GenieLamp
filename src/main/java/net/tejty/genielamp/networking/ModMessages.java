@@ -8,6 +8,8 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import net.tejty.genielamp.GenieLamp;
 import net.tejty.genielamp.networking.packet.ItemWishingC2SPacket;
+import net.tejty.genielamp.networking.packet.RenderTotemAnimationForItemS2CPacket;
+import net.tejty.genielamp.networking.packet.WishingScreenOpenS2CPacket;
 
 public class ModMessages {
     private static SimpleChannel INSTANCE;
@@ -31,6 +33,16 @@ public class ModMessages {
                 .decoder(ItemWishingC2SPacket::new)
                 .encoder(ItemWishingC2SPacket::toBytes)
                 .consumerMainThread(ItemWishingC2SPacket::handle)
+                .add();
+        net.messageBuilder(WishingScreenOpenS2CPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(WishingScreenOpenS2CPacket::new)
+                .encoder(WishingScreenOpenS2CPacket::toBytes)
+                .consumerMainThread(WishingScreenOpenS2CPacket::handle)
+                .add();
+        net.messageBuilder(RenderTotemAnimationForItemS2CPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(RenderTotemAnimationForItemS2CPacket::new)
+                .encoder(RenderTotemAnimationForItemS2CPacket::toBytes)
+                .consumerMainThread(RenderTotemAnimationForItemS2CPacket::handle)
                 .add();
     }
 

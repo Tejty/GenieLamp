@@ -1,17 +1,7 @@
 package net.tejty.genielamp;
 
 import com.mojang.logging.LogUtils;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
@@ -24,11 +14,9 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
 import net.tejty.genielamp.block.ModBlocks;
 import net.tejty.genielamp.config.GenieLampCommonConfigs;
+import net.tejty.genielamp.init.ModMenus;
 import net.tejty.genielamp.item.ModItems;
 import net.tejty.genielamp.networking.ModMessages;
 import org.slf4j.Logger;
@@ -48,6 +36,7 @@ public class GenieLamp {
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
 
+        ModMenus.REGISTRY.register(modEventBus);
         modEventBus.addListener(this::commonSetup);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, GenieLampCommonConfigs.SPEC, "genie_lamp-common.toml");
@@ -57,7 +46,9 @@ public class GenieLamp {
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
-        ModMessages.register();
+        event.enqueueWork(() -> {
+            ModMessages.register();
+        });
     }
 
     // Add the example block item to the building blocks tab

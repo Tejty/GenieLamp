@@ -1,12 +1,12 @@
 package net.tejty.genielamp.item.custom;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -20,6 +20,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.tejty.genielamp.config.GenieLampCommonConfigs;
 import net.tejty.genielamp.item.ModItems;
+import net.tejty.genielamp.networking.ModMessages;
+import net.tejty.genielamp.networking.packet.RenderTotemAnimationForItemS2CPacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -123,7 +125,9 @@ public class GenieLampItem extends Item {
                     pPlayer.displayClientMessage(Component.literal(getMaxExperience() + "/" + getMaxExperience()).withStyle(ChatFormatting.DARK_GREEN), true);
 
                     // Rendering totem-like animation for lamp
-                    Minecraft.getInstance().gameRenderer.displayItemActivation(new ItemStack(ModItems.MAGIC_LAMP.get()));
+                    if (pPlayer instanceof ServerPlayer serverPlayer) {
+                        ModMessages.sendToPlayer(new RenderTotemAnimationForItemS2CPacket(new ItemStack(ModItems.CHARGED_MAGIC_LAMP.get(), 1)), serverPlayer);
+                    }
 
                     // Spawning particles
                     for (int i = 0; i < 50; i++) {

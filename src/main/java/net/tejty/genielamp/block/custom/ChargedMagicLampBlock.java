@@ -1,22 +1,23 @@
 package net.tejty.genielamp.block.custom;
 
-import net.minecraft.client.Minecraft;
+import io.netty.buffer.Unpooled;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.ParticleUtils;
 import net.minecraft.util.RandomSource;
-import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.flag.FeatureFlagSet;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -29,8 +30,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.tejty.genielamp.client.gui.screens.WishingScreen;
-import org.jetbrains.annotations.NotNull;
+import net.minecraftforge.network.NetworkHooks;
+import net.tejty.genielamp.world.inventory.GenieLampMenu;
 
 public class ChargedMagicLampBlock extends HorizontalDirectionalBlock {
     public static final DirectionProperty FACING;
@@ -112,11 +113,22 @@ public class ChargedMagicLampBlock extends HorizontalDirectionalBlock {
 
     @Override
     public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
-        if (pLevel.isClientSide) {
-            Minecraft.getInstance().setScreen(new WishingScreen(pLevel, pPlayer, pPos));
-        }
+        if (pPlayer == null)
+            return InteractionResult.FAIL;
+        if (pPlayer instanceof ServerPlayer _ent) {
+            NetworkHooks.openScreen((ServerPlayer) _ent, new MenuProvider() {
+                @Override
+                public Component getDisplayName() {
+                    return Component.literal("Wishing Screen");
+                }
 
-        return InteractionResult.SUCCESS;
+                @Override
+                public AbstractContainerMenu createMenu(int id, Inventory inventory, Player player) {
+                    return new GenieLampMenu(id, inventory, new FriendlyByteBuf(Unpooled.buffer()).writeBlockPos(pPos));
+                }
+            }, pPos);
+        }
+        return InteractionResult.sidedSuccess(pLevel.isClientSide());
     }
 
     @Override
@@ -146,6 +158,5 @@ public class ChargedMagicLampBlock extends HorizontalDirectionalBlock {
         if (random.nextInt(0, 5) == 0) {
             pLevel.playLocalSound(pPos, SoundEvents.ALLAY_AMBIENT_WITHOUT_ITEM, SoundSource.BLOCKS, 0.5F, 0.5F, true);
         }
-        //ParticleUtils.spawnParticlesAlongAxis(((Direction)pState.getValue(FACING)).getAxis(), pLevel, pPos, 0.125, ParticleTypes.ELECTRIC_SPARK, UniformInt.of(1, 2));
     }
 }

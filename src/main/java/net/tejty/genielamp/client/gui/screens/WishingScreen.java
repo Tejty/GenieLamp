@@ -7,11 +7,13 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.CreativeModeTab;
@@ -26,9 +28,9 @@ import net.minecraftforge.fml.loading.StringUtils;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tejty.genielamp.block.ModBlocks;
 import net.tejty.genielamp.config.GenieLampCommonConfigs;
-import net.tejty.genielamp.item.ModItems;
 import net.tejty.genielamp.networking.ModMessages;
 import net.tejty.genielamp.networking.packet.ItemWishingC2SPacket;
+import net.tejty.genielamp.world.inventory.GenieLampMenu;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -38,7 +40,7 @@ import java.util.stream.Collectors;
 import static net.minecraftforge.common.ForgeI18n.stripControlCodes;
 
 @OnlyIn(Dist.CLIENT)
-public class WishingScreen extends Screen {
+public class WishingScreen extends AbstractContainerScreen<GenieLampMenu> {
     public static final ResourceLocation BACKGROUND_LOCATION = new ResourceLocation("genie_lamp:textures/gui/wishing_screen.png");
     private static final int FILE_WIDTH = 256;
     private static final int FILE_HEIGHT = 256;
@@ -96,11 +98,12 @@ public class WishingScreen extends Screen {
     private int getSlotPadding(){return (SLOT_SIZE - ITEM_SIZE) / 2;}
     private int getSliderRange(){return SLIDER_BAR_HEIGHT - SLIDER_HEIGHT;}
 
-    public WishingScreen(Level pLevel, Player pPlayer, BlockPos pLampPos) {
-        super(Component.literal("Item Wishing"));
-        level = pLevel;
-        player = pPlayer;
-        lampPos = pLampPos;
+    public WishingScreen(GenieLampMenu container, Inventory inventory, Component text) {
+        super(container, inventory, text);
+
+        level = inventory.player.level();
+        player = inventory.player;
+        lampPos = new BlockPos(container.x, container.y, container.z);
     }
 
     @Override
@@ -114,14 +117,10 @@ public class WishingScreen extends Screen {
     }
 
     private void createScreen() {
-        //unsortedItems = ForgeRegistries.ITEMS.getValues();
         CreativeModeTab tab = CreativeModeTabRegistry.getTab(new ResourceLocation("search"));
         List<Item> bannedItems = GenieLampCommonConfigs.BANNED_ITEMS.get().stream()
                 .map(itemName -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName))).toList();
         unsortedItemsFromTab = tab.getDisplayItems().stream().filter((ItemStack stack) -> !bannedItems.contains(stack.getItem())).collect(Collectors.toList());
-        /*player.displayClientMessage(Component.literal("name: " + tab.getDisplayName()), false);
-        player.displayClientMessage(Component.literal("size: " + unsortedItemsFromTab.size()), false);
-        player.displayClientMessage(Component.literal("item: " + tab), false);*/
         items = unsortedItemsFromTab;
         this.searchBox = new EditBox(this.font, getBackgroundCornerX() + SEARCH_BOX_PADDING_LEFT, getBackgroundCornerY() + SEARCH_BOX_PADDING_TOP, SEARCH_BOX_WIDTH, SEARCH_BOX_HEIGHT, Component.translatable("itemGroup.search"));
         this.searchBox.setMaxLength(50);
@@ -134,11 +133,10 @@ public class WishingScreen extends Screen {
     }
 
     @Override
-    public void tick() {
-        super.tick();
+    public void containerTick() {
         searchBox.tick();
         if (!level.getBlockState(lampPos).is(ModBlocks.CHARGED_MAGIC_LAMP.get())){
-            this.minecraft.setScreen((Screen)null);
+            this.minecraft.player.closeContainer();
         }
     }
 
@@ -171,8 +169,6 @@ public class WishingScreen extends Screen {
     }
 
     public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-        // TODO add darker background
-        super.render(graphics, mouseX, mouseY, partialTicks);
         graphics.blit(BACKGROUND_LOCATION, getBackgroundCornerX(), getBackgroundCornerY(), 0, 0, 0, getBackgroundWidth(), getBackgroundHeight(), FILE_WIDTH, FILE_HEIGHT);
         int itemValue = 0;
         while (itemValue < COLUMNS * ROWS) {
@@ -188,7 +184,6 @@ public class WishingScreen extends Screen {
                 if (mouseX >= x + getSlotPadding() && mouseX <= x + ITEM_SIZE + getSlotPadding() && mouseY >= y + getSlotPadding() && mouseY <= y + ITEM_SIZE + getSlotPadding()) {
                     graphics.renderTooltip(this.font, stack, mouseX, mouseY);
                     graphics.fill(x, y, x + SLOT_SIZE, y + SLOT_SIZE, FastColor.ARGB32.color(100, 200, 200, 200));
-                    //graphics.renderOutline(x, y, SLOT_SIZE, SLOT_SIZE, 255255255);
                 }
             } catch (Exception ignored){}
             itemValue++;
@@ -265,15 +260,11 @@ public class WishingScreen extends Screen {
         ) {
             int x = (int)pMouseX - getContentCornerX();
             int y = (int)pMouseY - getContentCornerY();
-            //player.displayClientMessage(Component.literal("x, y: " + x + ", " + y), false);
 
             int slotX = (int)((float)x / (float)SLOT_SIZE);
             int slotY = (int)((float)y / (float)SLOT_SIZE);
-            //player.displayClientMessage(Component.literal("slot x, slot y: " + slotX + ", " + slotY), false);
             try {
                 ItemStack stack = ((ItemStack) items.toArray()[(slotY * COLUMNS + slotX) + scrollOff * COLUMNS]).copy();
-                //player.displayClientMessage(Component.literal("stack: " + stack.getItem().getName(stack)), false);
-                //player.addItem(stack);
 
                 if (level.getBlockState(lampPos).is(ModBlocks.CHARGED_MAGIC_LAMP.get())) {
                     ModMessages.sendToServer(new ItemWishingC2SPacket(stack, lampPos));
@@ -293,19 +284,6 @@ public class WishingScreen extends Screen {
     private void refreshSearchResults() {
         items = unsortedItemsFromTab.stream().filter((ItemStack item) -> StringUtils.toLowerCase(stripControlCodes(item.getItem().getName(item).getString())).contains(StringUtils.toLowerCase(searchBox.getValue()))).collect(Collectors.toList());
         this.scrollOff = 0;
-        /*
-        items.clear();
-        String s = this.searchBox.getValue();
-        if (s.isEmpty()) {
-            items.addAll(ForgeRegistries.ITEMS.getValues());
-        } else {
-
-            items.addAll(searchtree.search(s.toLowerCase(Locale.ROOT)));
-        }
-
-        this.scrollOff = 0;
-        ((CreativeModeInventoryScreen.ItemPickerMenu)this.menu).scrollTo(0.0F);
-        */
     }
 
     private Button openScreenButton(Component component, Supplier<Screen> screenSupplier) {
